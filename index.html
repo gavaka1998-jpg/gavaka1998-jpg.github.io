@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>TON FORGE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+  background:#0f1115;
+  color:#fff;
+  font-family:Arial;
+  padding:20px;
+}
+button {
+  width:100%;
+  padding:16px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  margin-top:12px;
+  background:#2f7cff;
+  color:white;
+}
+</style>
+</head>
+<body>
+
+<h2>🔥 TON FORGE</h2>
+
+<button onclick="mine()">⛏️ Собрать доход</button>
+<button onclick="openBot('📊 Баланс')">📊 Баланс</button>
+
+<script>
+const tg = Telegram.WebApp;
+tg.expand();
+
+function mine() {
+  tg.sendData("⛏️ Майнинг");
+  tg.close();
+}
+
+function openBot(text) {
+  tg.sendData(text);
+  tg.close();
+}
+</script>
+
+</body>
+</html>
