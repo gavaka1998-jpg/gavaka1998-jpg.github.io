@@ -29,26 +29,38 @@
 
 <h1>🔥 TON FORGE</h1>
 
-<div id="balance">Загрузка...</div>
+<div id="loading">Загрузка...</div>
 
-<button class="up" onclick="upgrade()">Апгрейд</button>
-<button class="wd" onclick="withdraw()">Вывод</button>
+<button id="upgrade">Апгрейд</button>
+<button id="withdraw">Вывод</button>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.ready();
+  const tg = window.Telegram.WebApp;
 
-function upgrade(){
-    tg.sendData(JSON.stringify({action:"upgrade"}));
-}
+  // ОБЯЗАТЕЛЬНО
+  tg.ready();
+  tg.expand();
 
-function withdraw(){
-    tg.sendData(JSON.stringify({action:"withdraw"}));
-}
+  console.log("WebApp ready");
 
-tg.onEvent("viewportChanged", () => {
-    tg.expand();
-});
+  // КНОПКИ
+  const upgradeBtn = document.getElementById("upgrade");
+  const withdrawBtn = document.getElementById("withdraw");
+
+  upgradeBtn.onclick = () => {
+    tg.sendData(JSON.stringify({
+      action: "upgrade"
+    }));
+  };
+
+  withdrawBtn.onclick = () => {
+    tg.sendData(JSON.stringify({
+      action: "withdraw"
+    }));
+  };
+
+  // Убираем "Загрузка..."
+  document.getElementById("loading").style.display = "none";
 </script>
 
 </body>
