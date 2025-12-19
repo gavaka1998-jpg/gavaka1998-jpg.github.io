@@ -1,48 +1,35 @@
-﻿<!DOCTYPE html>
-<html>
+﻿<!doctype html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>TON FORGE</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-body{background:#0f1115;color:#fff;font-family:Arial}
-.box{padding:20px}
-.btn{padding:12px;margin:8px;background:#1f6bff;border-radius:12px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TON FORGE</title>
+  <style>
+    body { font-family: Arial; background:#0f1a2b; color:#fff; margin:0; }
+    .wrap { max-width:520px; margin:30px auto; padding:20px; }
+    .title { font-size:34px; font-weight:800; margin-bottom:10px; }
+    .card { background:#14233a; border-radius:14px; padding:16px; margin-top:12px; }
+    .big { font-size:26px; font-weight:700; }
+    button { width:100%; padding:14px; border:0; border-radius:12px; margin-top:10px; font-size:18px; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+  </style>
 </head>
 <body>
-  <h2>🔥 TON FORGE</h2>
+  <div class="wrap">
+    <div class="title">🔥 TON FORGE</div>
 
-  <div id="balance">0.00000000 TON</div>
+    <div class="card">
+      <div>Баланс:</div>
+      <div class="big" id="balance">0.00000000 TON</div>
+      <div style="margin-top:8px;">Скорость: <b id="rate">0.00000000 TON / 5сек</b></div>
+      <div style="margin-top:8px;">Уровень: <b id="lvl">0</b></div>
+      <div style="margin-top:8px;">След. апгрейд: <b id="nextCost">0.4 TON</b></div>
+    </div>
 
-  <button onclick="upgrade()">🚀 Апгрейд</button>
-  <button onclick="withdraw()">💸 Вывод</button>
+    <button id="btnUpgrade">Апгрейд</button>
+    <button id="btnWithdraw">Вывод</button>
+  </div>
 
   <script src="script.js"></script>
-</body>
-
-<script>
-const tg=Telegram.WebApp; tg.expand();
-let bal=0,reward=0,tick=5,lvl=0;
-
-tg.sendData(JSON.stringify({action:"state"}));
-
-tg.onEvent("message",(e)=>{
- try{
-  const d=JSON.parse(e.data);
-  bal=d.balance; reward=d.reward; tick=d.tick; lvl=d.lvl;
-  setInterval(()=>{
-    bal+=reward/tick;
-    document.getElementById("bal").innerText=bal.toFixed(10)+" TON";
-  },1000);
- }catch{}
-});
-
-function upgrade(){ tg.sendData(JSON.stringify({action:"upgrade"})); }
-function withdraw(){
- const a=prompt("TON адрес:");
- if(a) tg.sendData(JSON.stringify({action:"withdraw",addr:a}));
-}
-</script>
 </body>
 </html>
