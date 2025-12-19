@@ -1,75 +1,86 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>TON FORGE</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TON FORGE</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        body {
-            background:#0f172a;
-            color:white;
-            font-family:Arial, sans-serif;
-            text-align:center;
-            padding-top:40px;
-        }
-
-        h1 {
-            margin-bottom:20px;
-        }
-
-        button {
-            width:220px;
-            padding:15px;
-            margin:10px auto;
-            font-size:18px;
-            border:none;
-            border-radius:12px;
-            cursor:pointer;
-            display:block;
-        }
-
-        .up { background:#38bdf8; }
-        .wd { background:#22c55e; }
-
-        #loading {
-            margin-bottom:20px;
-            opacity:0.7;
-        }
-    </style>
+  <style>
+    body{
+      background:#0f172a;color:#fff;font-family:Arial,sans-serif;
+      text-align:center;padding-top:60px;margin:0;
+    }
+    h1{margin:0 0 20px 0;}
+    .wrap{max-width:420px;margin:0 auto;padding:0 16px;}
+    .status{
+      margin:14px auto 18px auto;opacity:.85;font-size:14px;
+      background:rgba(255,255,255,.06);padding:10px 12px;border-radius:12px;
+    }
+    button{
+      width:260px;max-width:100%;
+      padding:16px;margin:12px auto;font-size:18px;
+      border:none;border-radius:14px;cursor:pointer;display:block;
+    }
+    .up{background:#38bdf8;color:#06202b;}
+    .wd{background:#22c55e;color:#06202b;}
+    .small{font-size:12px;opacity:.7;margin-top:18px}
+  </style>
 </head>
+
 <body>
+  <div class="wrap">
+    <h1>🔥 TON FORGE</h1>
+    <div id="status" class="status">Загрузка WebApp…</div>
 
-<h1>🔥 TON FORGE</h1>
+    <button id="upgrade" class="up">Апгрейд</button>
+    <button id="withdraw" class="wd">Вывод</button>
 
-<div id="loading">Загрузка...</div>
+    <div class="small" id="dbg"></div>
+  </div>
 
-<button id="upgrade" class="up">Апгрейд</button>
-<button id="withdraw" class="wd">Вывод</button>
+  <script>
+    const statusEl = document.getElementById("status");
+    const dbgEl = document.getElementById("dbg");
 
-<script>
-    const tg = window.Telegram.WebApp;
+    function setStatus(t){ statusEl.textContent = t; }
+    function dbg(t){ dbgEl.textContent = t; }
 
-    tg.ready();
-    tg.expand();
+    const tg = window.Telegram?.WebApp;
 
-    // Убираем загрузку — ВАЖНО
-    document.getElementById("loading").style.display = "none";
+    if (!tg) {
+      setStatus("❌ Открыто НЕ в Telegram WebApp (tg не найден)");
+      alert("Открой через Telegram → кнопка «Открыть приложение»");
+    } else {
+      tg.ready();
+      tg.expand();
 
-    document.getElementById("upgrade").addEventListener("click", () => {
-        console.log("UPGRADE CLICK");
-        tg.sendData(JSON.stringify({ action: "upgrade" }));
-    });
+      // покажем полезные данные, чтобы понимать что Telegram реально подключился
+      setStatus("✅ Telegram WebApp готов");
+      dbg("platform=" + (tg.platform  "?") + " | ver=" + (tg.version  "?"));
 
-    document.getElementById("withdraw").addEventListener("click", () => {
-        console.log("WITHDRAW CLICK");
-        tg.sendData(JSON.stringify({ action: "withdraw" }));
-    });
-</script>
+      function send(action){
+        // 1) СРАЗУ показываем Alert → если его видно, значит клик работает 100%
+        tg.showAlert("Нажато: " + action);
 
+        // 2) Отправляем данные в бот
+        const payload = {
+          action,
+          ts: Date.now()
+        };
+
+        try {
+          tg.sendData(JSON.stringify(payload));
+          // 3) На всякий случай закрываем (иногда клиент не закрывает сам)
+          setTimeout(() => tg.close(), 350);
+        } catch (e) {
+          tg.showAlert("Ошибка sendData: " + String(e));
+        }
+      }
+
+      document.getElementById("upgrade").addEventListener("click", () => send("upgrade"));
+      document.getElementById("withdraw").addEventListener("click", () => send("withdraw"));
+    }
+  </script>
 </body>
 </html>
