@@ -37,30 +37,16 @@
 <script>
   const tg = window.Telegram.WebApp;
 
-  // ОБЯЗАТЕЛЬНО
   tg.ready();
   tg.expand();
 
-  console.log("WebApp ready");
-
-  // КНОПКИ
-  const upgradeBtn = document.getElementById("upgrade");
-  const withdrawBtn = document.getElementById("withdraw");
-
-  upgradeBtn.onclick = () => {
-    tg.sendData(JSON.stringify({
-      action: "upgrade"
-    }));
+  document.getElementById("upgrade").onclick = () => {
+    tg.sendData(JSON.stringify({ action: "upgrade" }));
   };
 
-  withdrawBtn.onclick = () => {
-    tg.sendData(JSON.stringify({
-      action: "withdraw"
-    }));
+  document.getElementById("withdraw").onclick = () => {
+    tg.sendData(JSON.stringify({ action: "withdraw" }));
   };
-
-  // Убираем "Загрузка..."
-  document.getElementById("loading").style.display = "none";
 </script>
 
 </body>
