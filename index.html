@@ -2,85 +2,123 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>TON FORGE</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
     body{
-      background:#0f172a;color:#fff;font-family:Arial,sans-serif;
-      text-align:center;padding-top:60px;margin:0;
+      background:#0f172a;
+      color:#fff;
+      font-family:Arial, sans-serif;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:48px 16px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
-    h1{margin:0 0 20px 0;}
-    .wrap{max-width:420px;margin:0 auto;padding:0 16px;}
-    .status{
-      margin:14px auto 18px auto;opacity:.85;font-size:14px;
-      background:rgba(255,255,255,.06);padding:10px 12px;border-radius:12px;
+
+    .wrap{width:100%;max-width:420px;text-align:center;position:relative}
+
+    h1{margin:0 0 18px 0;font-size:34px}
+
+    /* ВАЖНО: этот блок НЕ должен перекрывать клики */
+    #loading{
+      margin:12px auto 14px auto;
+      opacity:.85;
+      font-size:14px;
+      background:rgba(255,255,255,.06);
+      padding:10px 12px;
+      border-radius:12px;
+      pointer-events:none; /* <-- ключевой фикс */
     }
-    button{
-      width:260px;max-width:100%;
-      padding:16px;margin:12px auto;font-size:18px;
-      border:none;border-radius:14px;cursor:pointer;display:block;
+
+    .btn{
+      width:100%;
+      padding:16px;
+      margin:12px 0;
+      font-size:20px;
+      border:none;
+      border-radius:16px;
+      cursor:pointer;
+      position:relative;
+      z-index:5; /* <-- чтобы быть выше любых слоёв */
     }
-    .up{background:#38bdf8;color:#06202b;}
-    .wd{background:#22c55e;color:#06202b;}
-    .small{font-size:12px;opacity:.7;margin-top:18px}
+    .up{background:#38bdf8;color:#05202a}
+    .wd{background:#22c55e;color:#05202a}
+
+    #counter{
+      margin-top:14px;
+      font-size:13px;
+      opacity:.8;
+      background:rgba(255,255,255,.06);
+      padding:10px 12px;
+      border-radius:12px;
+    }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <h1>🔥 TON FORGE</h1>
-    <div id="status" class="status">Загрузка WebApp…</div>
+    <div id="loading">Готово. Нажми кнопку — счётчик должен увеличиться.</div>
 
-    <button id="upgrade" class="up">Апгрейд</button>
-    <button id="withdraw" class="wd">Вывод</button>
+    <button id="upgrade" class="btn up" type="button">Апгрейд</button>
+    <button id="withdraw" class="btn wd" type="button">Вывод</button>
 
-    <div class="small" id="dbg"></div>
+    <div id="counter">Нажатий: 0</div>
   </div>
 
   <script>
-    const statusEl = document.getElementById("status");
-    const dbgEl = document.getElementById("dbg");
+    let clicks = 0;
+    const counter = document.getElementById("counter");
 
-    function setStatus(t){ statusEl.textContent = t; }
-    function dbg(t){ dbgEl.textContent = t; }
+    function bump(tag){
+      clicks++;
+      counter.textContent = "Нажатий: " + clicks + " (последнее: " + tag + ")";
+    }
 
-    const tg = window.Telegram?.WebApp;
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg){
+      try { tg.ready(); tg.expand(); } catch(e){}
+    }
 
-    if (!tg) {
-      setStatus("❌ Открыто НЕ в Telegram WebApp (tg не найден)");
-      alert("Открой через Telegram → кнопка «Открыть приложение»");
-    } else {
-      tg.ready();
-      tg.expand();
+    function send(tag){
+      bump(tag);
 
-      // покажем полезные данные, чтобы понимать что Telegram реально подключился
-      setStatus("✅ Telegram WebApp готов");
-      dbg("platform=" + (tg.platform  "?") + " | ver=" + (tg.version  "?"));
-
-      function send(action){
-        // 1) СРАЗУ показываем Alert → если его видно, значит клик работает 100%
-        tg.showAlert("Нажато: " + action);
-
-        // 2) Отправляем данные в бот
-        const payload = {
-          action,
-          ts: Date.now()
-        };
-
-        try {
-          tg.sendData(JSON.stringify(payload));
-          // 3) На всякий случай закрываем (иногда клиент не закрывает сам)
-          setTimeout(() => tg.close(), 350);
-        } catch (e) {
-          tg.showAlert("Ошибка sendData: " + String(e));
-        }
+      // Если tg есть — покажем alert в Telegram (если не покажет, всё равно счётчик меняется)
+      if (tg && tg.showAlert){
+        try { tg.showAlert("Нажато: " + tag); } catch(e){}
+      } else {
+        // если вдруг открыто не в Telegram
+        alert("Нажато: " + tag);
       }
 
-      document.getElementById("upgrade").addEventListener("click", () => send("upgrade"));
-      document.getElementById("withdraw").addEventListener("click", () => send("withdraw"));
+      // отправка данных в бота
+      if (tg && tg.sendData){
+        try {
+          tg.sendData(JSON.stringify({action: tag, ts: Date.now()}));
+          // tg.close(); // можно включить, если хочешь закрывать сразу
+        } catch(e){
+          if (tg.showAlert) tg.showAlert("sendData ошибка: " + e);
+        }
+      }
     }
+
+    function bind(id, tag){
+      const el = document.getElementById(id);
+
+      // Ловим ВСЁ: pointer/touch/click
+      el.addEventListener("pointerup", (e)=>{ e.preventDefault(); send(tag); }, {passive:false});
+      el.addEventListener("touchend", (e)=>{ e.preventDefault(); send(tag); }, {passive:false});
+      el.addEventListener("click",    (e)=>{ e.preventDefault(); send(tag); }, {passive:false});
+    }
+
+    bind("upgrade", "upgrade");
+    bind("withdraw", "withdraw");
   </script>
 </body>
 </html>
