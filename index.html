@@ -5,36 +5,41 @@
 <title>TON FORGE</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-body{background:#0f1115;color:#fff;font-family:Arial;padding:20px}
-.card{background:#1c1f26;border-radius:16px;padding:20px}
-.val{font-size:28px}
+body{background:#0f1115;color:#fff;font-family:Arial}
+.box{padding:20px}
+.btn{padding:12px;margin:8px;background:#1f6bff;border-radius:12px}
 </style>
 </head>
 <body>
-<div class="card">
-<h2>🔥 TON FORGE</h2>
-<div>Баланс:</div>
-<div class="val" id="bal">0.0000000000</div>
+<div class="box">
+<h2>TON FORGE</h2>
+<div id="bal">0</div>
+<div class="btn" onclick="upgrade()">Апгрейд</div>
+<div class="btn" onclick="withdraw()">Вывод</div>
 </div>
 
 <script>
-const tg = Telegram.WebApp;
-tg.expand();
-
-let bal=0, reward=0, tick=5, speed=1;
+const tg=Telegram.WebApp; tg.expand();
+let bal=0,reward=0,tick=5,lvl=0;
 
 tg.sendData(JSON.stringify({action:"state"}));
 
 tg.onEvent("message",(e)=>{
-  try{
-    let d=JSON.parse(e.data);
-    bal=d.balance; reward=d.reward; tick=d.tick; speed=d.speed;
-    setInterval(()=>{
-      bal += (reward*speed)/tick;
-      document.getElementById("bal").innerText = bal.toFixed(10);
-    },1000);
-  }catch{}
+ try{
+  const d=JSON.parse(e.data);
+  bal=d.balance; reward=d.reward; tick=d.tick; lvl=d.lvl;
+  setInterval(()=>{
+    bal+=reward/tick;
+    document.getElementById("bal").innerText=bal.toFixed(10)+" TON";
+  },1000);
+ }catch{}
 });
+
+function upgrade(){ tg.sendData(JSON.stringify({action:"upgrade"})); }
+function withdraw(){
+ const a=prompt("TON адрес:");
+ if(a) tg.sendData(JSON.stringify({action:"withdraw",addr:a}));
+}
 </script>
 </body>
 </html>
